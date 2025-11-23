@@ -20,8 +20,8 @@ router.get("/backstagetitles", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -60,8 +60,8 @@ router.get("/backstagetranscripts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: cleanedTerm, $options: "i" } }, // Exact match for title
-              { transcript: { $regex: cleanedTerm, $options: "i" } } // Exact match for transcript
-            ]
+              { transcript: { $regex: cleanedTerm, $options: "i" } }, // Exact match for transcript
+            ],
           });
         } else {
           // Partial match using regular expression
@@ -69,15 +69,15 @@ router.get("/backstagetranscripts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: searchRegex } },
-              { transcript: { $regex: searchRegex } }
-            ]
+              { transcript: { $regex: searchRegex } },
+            ],
           });
         }
       });
 
       // Combine individual search criteria with AND operator
       query = {
-        $and: searchCriteria
+        $and: searchCriteria,
       };
     }
 
@@ -106,8 +106,8 @@ router.get("/backstagetranscripts/meta", async function (req, res, next) {
         $or: [
           { title: { $regex: searchRegex } },
           { transcript: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -141,8 +141,8 @@ router.get("/backstagetitles/meta", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -188,7 +188,7 @@ router.get(
     try {
       const episodeNumber = req.params.episodeNumber;
       const backstagetranscripts = await BackstageTranscript.findOne({
-        episode: episodeNumber
+        episode: episodeNumber,
       });
 
       if (!backstagetranscripts) {
@@ -202,5 +202,15 @@ router.get(
     }
   }
 );
+
+// Get the latest episode number for BackstageTitle
+router.get("/backstagetitles/latest", async function (req, res, next) {
+  try {
+    const latest = await BackstageTitle.findOne().sort({ episode: -1 });
+    res.json({ latestEpisode: latest ? latest.episode : 0 });
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

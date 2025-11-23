@@ -8,7 +8,7 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel
+  InputLabel,
 } from "@material-ui/core";
 import axios from "axios";
 
@@ -17,19 +17,19 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    marginTop: theme.spacing(8)
+    marginTop: theme.spacing(8),
   },
   form: {
     width: "100%",
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
   },
   submit: {
-    margin: theme.spacing(3, 0, 2)
+    margin: theme.spacing(3, 0, 2),
   },
   textArea: {
     width: "100%",
-    marginTop: theme.spacing(2)
-  }
+    marginTop: theme.spacing(2),
+  },
 }));
 
 const AdminPage = ({ token }) => {
@@ -38,6 +38,7 @@ const AdminPage = ({ token }) => {
   const [title, setTitle] = useState("");
   const [episode, setEpisode] = useState("");
   const [transcript, setTranscript] = useState("");
+  const [loadingEpisode, setLoadingEpisode] = useState(false);
   const [formattedTitle, setFormattedTitle] = useState("");
   const [error, setError] = useState("");
 
@@ -49,6 +50,27 @@ const AdminPage = ({ token }) => {
     }
   }, [title, episode, host]);
 
+  useEffect(() => {
+    if (!host) return;
+    setLoadingEpisode(true);
+    setEpisode("");
+    const endpoints = {
+      "Matt Walsh": "http://localhost:9000/api/titles/latest",
+      "Michael Knowles": "http://localhost:9000/api/mktitles/latest",
+      "Andrew Klavan": "http://localhost:9000/api/aktitles/latest",
+    };
+    const url = endpoints[host];
+    if (!url) return;
+    axios
+      .get(url)
+      .then((res) => {
+        const nextEpisode = (res.data.latestEpisode || 0) + 1;
+        setEpisode(nextEpisode);
+      })
+      .catch(() => setEpisode(""))
+      .finally(() => setLoadingEpisode(false));
+  }, [host]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!host || !title || !episode || !transcript) {
@@ -58,23 +80,17 @@ const AdminPage = ({ token }) => {
 
     const endpoints = {
       "Matt Walsh": {
-        titles:
-          "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/titles",
-        posts:
-          "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/posts"
+        titles: "http://localhost:9000/api/titles",
+        posts: "http://localhost:9000/api/posts",
       },
       "Michael Knowles": {
-        titles:
-          "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/mktitles",
-        posts:
-          "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/mktranscripts"
+        titles: "http://localhost:9000/api/mktitles",
+        posts: "http://localhost:9000/api/mktranscripts",
       },
       "Andrew Klavan": {
-        titles:
-          "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/aktitles",
-        posts:
-          "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/aktranscripts"
-      }
+        titles: "http://localhost:9000/api/aktitles",
+        posts: "http://localhost:9000/api/aktranscripts",
+      },
     };
 
     const selectedEndpoints = endpoints[host];
@@ -84,7 +100,7 @@ const AdminPage = ({ token }) => {
         selectedEndpoints.titles,
         { title: formattedTitle, episode },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -92,15 +108,32 @@ const AdminPage = ({ token }) => {
         selectedEndpoints.posts,
         { title: formattedTitle, episode, transcript },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       setTitle("");
-      setEpisode("");
       setTranscript("");
       setError("");
-      alert("Post successful");
+    
+      // Re-fetch latest episode number for the selected host
+      setLoadingEpisode(true);
+      const endpointsLatest = {
+        "Matt Walsh": "http://localhost:9000/api/titles/latest",
+        "Michael Knowles": "http://localhost:9000/api/mktitles/latest",
+        "Andrew Klavan": "http://localhost:9000/api/aktitles/latest",
+      };
+      const urlLatest = endpointsLatest[host];
+      if (urlLatest) {
+        axios
+          .get(urlLatest)
+          .then((res) => {
+            const nextEpisode = (res.data.latestEpisode || 0) + 1;
+            setEpisode(nextEpisode);
+          })
+          .catch(() => setEpisode(""))
+          .finally(() => setLoadingEpisode(false));
+      }
     } catch (err) {
       console.error("Error posting data:", err);
       setError("Error posting data");
@@ -143,6 +176,8 @@ const AdminPage = ({ token }) => {
             label="Episode Number"
             value={episode}
             onChange={(e) => setEpisode(e.target.value)}
+            disabled={loadingEpisode}
+            helperText={loadingEpisode ? "Loading next episode..." : ""}
           />
           <TextField
             variant="outlined"
@@ -151,7 +186,7 @@ const AdminPage = ({ token }) => {
             label="Formatted Title"
             value={formattedTitle}
             InputProps={{
-              readOnly: true
+              readOnly: true,
             }}
           />
           <TextField

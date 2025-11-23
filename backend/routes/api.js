@@ -23,8 +23,8 @@ router.get("/titles", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -63,8 +63,8 @@ router.get("/posts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: cleanedTerm, $options: "i" } }, // Exact match for title
-              { transcript: { $regex: cleanedTerm, $options: "i" } } // Exact match for transcript
-            ]
+              { transcript: { $regex: cleanedTerm, $options: "i" } }, // Exact match for transcript
+            ],
           });
         } else {
           // Partial match using regular expression
@@ -72,15 +72,15 @@ router.get("/posts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: searchRegex } },
-              { transcript: { $regex: searchRegex } }
-            ]
+              { transcript: { $regex: searchRegex } },
+            ],
           });
         }
       });
 
       // Combine individual search criteria with AND operator
       query = {
-        $and: searchCriteria
+        $and: searchCriteria,
       };
     }
 
@@ -109,8 +109,8 @@ router.get("/posts/meta", async function (req, res, next) {
         $or: [
           { title: { $regex: searchRegex } },
           { transcript: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -178,8 +178,8 @@ router.get("/titles/meta", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -216,8 +216,8 @@ router.get("/cancelled", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { cancelled: { $regex: cleanedTerm, $options: "i" } }, // Exact match for title
-              { context: { $regex: cleanedTerm, $options: "i" } } // Exact match for transcript
-            ]
+              { context: { $regex: cleanedTerm, $options: "i" } }, // Exact match for transcript
+            ],
           });
         } else {
           // Partial match using regular expression
@@ -225,15 +225,15 @@ router.get("/cancelled", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { cancelled: { $regex: searchRegex } },
-              { context: { $regex: searchRegex } }
-            ]
+              { context: { $regex: searchRegex } },
+            ],
           });
         }
       });
 
       // Combine individual search criteria with AND operator
       query = {
-        $and: searchCriteria
+        $and: searchCriteria,
       };
     }
 
@@ -290,8 +290,8 @@ router.get("/canceltitles", async function (req, res, next) {
       query = {
         $and: [
           { cancelled: { $regex: searchRegex } },
-          { Category: { $regex: categoryRegex } }
-        ]
+          { Category: { $regex: categoryRegex } },
+        ],
       };
     } else if (searchQuery) {
       // If there's only a search query, construct the query for the cancelled field
@@ -326,8 +326,8 @@ router.get("/canceltitles/meta", async function (req, res, next) {
       query = {
         $or: [
           { cancelled: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -356,8 +356,8 @@ router.get("/dc/meta", async function (req, res, next) {
           { cancelled: { $regex: searchRegex } },
           { context: { $regex: searchRegex } },
           { Category: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -416,6 +416,16 @@ router.post("/transcripts", async function (req, res, next) {
   try {
     const transcript = await Transcript.create(req.body);
     res.send(transcript);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get the latest episode number for Title (Matt Walsh)
+router.get("/titles/latest", async function (req, res, next) {
+  try {
+    const latest = await Title.findOne().sort({ episode: -1 });
+    res.json({ latestEpisode: latest ? latest.episode : 0 });
   } catch (error) {
     next(error);
   }

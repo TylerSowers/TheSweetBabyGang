@@ -19,8 +19,8 @@ router.get("/mktranscripts/meta", async function (req, res, next) {
         $or: [
           { title: { $regex: searchRegex } },
           { transcript: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -46,8 +46,8 @@ router.get("/mktitles", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -75,8 +75,8 @@ router.get("/mktitles/meta", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -113,8 +113,8 @@ router.get("/mktranscripts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: cleanedTerm, $options: "i" } }, // Exact match for title
-              { transcript: { $regex: cleanedTerm, $options: "i" } } // Exact match for transcript
-            ]
+              { transcript: { $regex: cleanedTerm, $options: "i" } }, // Exact match for transcript
+            ],
           });
         } else {
           // Partial match using regular expression
@@ -122,15 +122,15 @@ router.get("/mktranscripts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: searchRegex } },
-              { transcript: { $regex: searchRegex } }
-            ]
+              { transcript: { $regex: searchRegex } },
+            ],
           });
         }
       });
 
       // Combine individual search criteria with AND operator
       query = {
-        $and: searchCriteria
+        $and: searchCriteria,
       };
     }
     const mktranscripts = await MKTranscript.find(query)
@@ -173,6 +173,16 @@ router.get("/mktranscripts/:episodeNumber", async function (req, res, next) {
     }
 
     res.json(mktranscript);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get the latest episode number for MKTitle
+router.get("/mktitles/latest", async function (req, res, next) {
+  try {
+    const latest = await MKTitle.findOne().sort({ episode: -1 });
+    res.json({ latestEpisode: latest ? latest.episode : 0 });
   } catch (error) {
     next(error);
   }

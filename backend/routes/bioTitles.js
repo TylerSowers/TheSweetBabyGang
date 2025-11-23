@@ -58,4 +58,15 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
+// Get the latest episode number for BioTitle
+router.get("/latest", async function (req, res) {
+  try {
+    const latest = await BioTitle.findOne().sort({ episode: -1 });
+    res.json({ latestEpisode: latest ? latest.episode : 0 });
+  } catch (err) {
+    console.error("Error fetching latest bio episode:", err);
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;

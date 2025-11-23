@@ -5,7 +5,7 @@ import {
   Button,
   Typography,
   Container,
-  Chip
+  Chip,
 } from "@material-ui/core";
 import axios from "axios";
 
@@ -14,29 +14,29 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    marginTop: theme.spacing(8)
+    marginTop: theme.spacing(8),
   },
   form: {
     width: "100%",
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
   },
   submit: {
-    margin: theme.spacing(3, 0, 2)
+    margin: theme.spacing(3, 0, 2),
   },
   textArea: {
     width: "100%",
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   chipContainer: {
     display: "flex",
     justifyContent: "center",
     flexWrap: "wrap",
     gap: theme.spacing(1),
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   chip: {
-    margin: theme.spacing(0.5)
-  }
+    margin: theme.spacing(0.5),
+  },
 }));
 
 const CancelledAdminPage = ({ token }) => {
@@ -72,13 +72,12 @@ const CancelledAdminPage = ({ token }) => {
     "Religion",
     "Religious",
     "Reverse Cancellation",
-    "SBG Favorites",
     "SBH Favorites",
     "Scum Of The Earth",
     "Social Media & Viral Internet Moments",
     "Sports",
     "States & Countries",
-    "Sweet Daddy Cone"
+    "Sweet Daddy Cone",
   ];
 
   const handleCategorySelect = (selectedCategory) => {
@@ -97,7 +96,7 @@ const CancelledAdminPage = ({ token }) => {
         "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/canceltitles",
         { cancelled, episode, Category },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -105,7 +104,7 @@ const CancelledAdminPage = ({ token }) => {
         "https://the-sweet-baby-gang-backend-git-main-tyler-sowers-projects.vercel.app/api/cancelled",
         { cancelled, episode, context, Category },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -114,7 +113,6 @@ const CancelledAdminPage = ({ token }) => {
       setContext("");
       setCategory("");
       setError("");
-      alert("Post successful");
     } catch (err) {
       console.error("Error posting data:", err);
       setError("Error posting data");

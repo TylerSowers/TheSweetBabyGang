@@ -19,8 +19,8 @@ router.get("/aktranscripts/meta", async function (req, res, next) {
         $or: [
           { title: { $regex: searchRegex } },
           { transcript: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -56,8 +56,8 @@ router.get("/aktranscripts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: cleanedTerm, $options: "i" } }, // Exact match for title
-              { transcript: { $regex: cleanedTerm, $options: "i" } } // Exact match for transcript
-            ]
+              { transcript: { $regex: cleanedTerm, $options: "i" } }, // Exact match for transcript
+            ],
           });
         } else {
           // Partial match using regular expression
@@ -65,15 +65,15 @@ router.get("/aktranscripts", async function (req, res, next) {
           searchCriteria.push({
             $or: [
               { title: { $regex: searchRegex } },
-              { transcript: { $regex: searchRegex } }
-            ]
+              { transcript: { $regex: searchRegex } },
+            ],
           });
         }
       });
 
       // Combine individual search criteria with AND operator
       query = {
-        $and: searchCriteria
+        $and: searchCriteria,
       };
     }
     const aktranscripts = await AKTranscript.find(query)
@@ -101,8 +101,8 @@ router.get("/aktitles", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -129,8 +129,8 @@ router.get("/aktitles/meta", async function (req, res, next) {
       query = {
         $or: [
           { title: { $regex: searchRegex } },
-          { episode: { $regex: searchRegex } }
-        ]
+          { episode: { $regex: searchRegex } },
+        ],
       };
     }
 
@@ -172,6 +172,16 @@ router.post("/aktitles", async function (req, res, next) {
   try {
     const aktitles = await AKTitle.create(req.body);
     res.send(aktitles);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get the latest episode number for AKTitle
+router.get("/aktitles/latest", async function (req, res, next) {
+  try {
+    const latest = await AKTitle.findOne().sort({ episode: -1 });
+    res.json({ latestEpisode: latest ? latest.episode : 0 });
   } catch (error) {
     next(error);
   }
